@@ -1,11 +1,13 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 // Class untuk membuat laporan
 
-class Login extends CI_Controller{
+class Login extends CI_Controller
+{
 
-  function __construct(){
+  function __construct()
+  {
     parent::__construct();
     $this->load->model('m_login', 'mlogin');
     $this->load->model('m_visit', 'mvisit');
@@ -14,10 +16,10 @@ class Login extends CI_Controller{
 
   public function b_template($data)
   {
-    if($this->sess_check() === true){
+    if ($this->sess_check() === true) {
       $this->load->view('template/index', $data);
-    }else{
-      redirect('logout','refresh');
+    } else {
+      redirect('logout', 'refresh');
     }
   }
 
@@ -25,10 +27,9 @@ class Login extends CI_Controller{
   {
     $username  = $this->session->userdata('username');
     $full_name = $this->session->userdata('full_name');
-    if($username == null || $username == "" || $full_name == null || $full_name == "")
-    {
+    if ($username == null || $username == "" || $full_name == null || $full_name == "") {
       return false;
-    }else{
+    } else {
       return true;
     }
   }
@@ -47,21 +48,21 @@ class Login extends CI_Controller{
 
     $count_username = $this->count_rows_db('username', $username); // COUNT ROWS
 
-    if($count_username == 0){ // IF USERNAME NOT FOUND IN DB
+    if ($count_username == 0) { // IF USERNAME NOT FOUND IN DB
       $return = array(
         'code'        => 400,
         'description' => "Username Not Found",
         'username'    => $username,
         'password'    => $password
       );
-    }elseif($count_username == 1){
+    } elseif ($count_username == 1) {
 
       $status = $this->check_status('username', $username);
 
-      if($status == 1){
+      if ($status == 1) {
         $password_db = $this->get_single_data_where('password', 'username', $username);
 
-        if(password_verify($password, $password_db)){
+        if (password_verify($password, $password_db)) {
 
           $full_name = $this->get_single_data_where('full_name', 'username', $username);
 
@@ -86,7 +87,7 @@ class Login extends CI_Controller{
             'status'      => $status,
             'full_name'   => $full_name
           );
-        }else{
+        } else {
           $return = array(
             'code'        => 400,
             'description' => "Wrong Password...",
@@ -95,8 +96,7 @@ class Login extends CI_Controller{
             'status'      => $status
           );
         }
-
-      }else{
+      } else {
         $return = array(
           'code'        => 500,
           'description' => "Username Status Not Active",
@@ -105,8 +105,7 @@ class Login extends CI_Controller{
           'status'      => $status
         );
       }
-      
-    }else{
+    } else {
       $return = array(
         'code'        => 400,
         'description' => "Username Duplicate",
@@ -136,13 +135,13 @@ class Login extends CI_Controller{
 
   public function dashboard()
   {
-    if($this->session->userdata('username') && $this->session->userdata('full_name')){
+    if ($this->session->userdata('username') && $this->session->userdata('full_name')) {
       //print_r($this->session);
       $data['count_visit']       = $this->mvisit->count_all_visit();
       $data['count_visit_today'] = $this->mvisit->count_visit(date('Y-m-d'));
       $data['content']           = "dashboard_sample";
       $this->load->view('template/index', $data);
-    }else{
+    } else {
       $this->logout();
     }
   }
@@ -177,7 +176,7 @@ class Login extends CI_Controller{
 
     $count_username = $this->mlogin->count_all_results('username', $username);
 
-    if($count_username == 0){
+    if ($count_username == 0) {
       $password_hash = $password = password_hash($password, PASSWORD_BCRYPT);
       $data = array(
         'username'  => $username,
@@ -188,19 +187,18 @@ class Login extends CI_Controller{
 
       $exec = $this->mlogin->create_admin($data);
 
-      if($exec === true){
+      if ($exec === true) {
         $return = array(
           'code'        => '200',
           'description' => 'Create Account Success...'
         );
-      }else{
+      } else {
         $return = array(
           'code'        => '400',
           'description' => 'Create Account Failed...'
         );
       }
-
-    }else{
+    } else {
       $return = array(
         'code'        => '400',
         'description' => 'Username Telah Digunakan...'
@@ -215,12 +213,12 @@ class Login extends CI_Controller{
     $id = $this->input->get('id');
     $exec = $this->mlogin->destroy($id);
 
-    if($exec === true){
+    if ($exec === true) {
       $return = array(
         'code'        => '200',
         'description' => 'Delete Account Success...'
       );
-    }else{
+    } else {
       $return = array(
         'code'        => '400',
         'description' => 'Delete Account Failed...'
@@ -236,20 +234,20 @@ class Login extends CI_Controller{
 
     $cur_status = $this->mlogin->check_status('id_admin', $id)->row('status');
 
-    if($cur_status == 1){
+    if ($cur_status == 1) {
       $new_status = 0;
-    }else{
+    } else {
       $new_status = 1;
     }
 
     $exec = $this->mlogin->update_status($id, $new_status);
 
-    if($exec === true){
+    if ($exec === true) {
       $return = array(
         'code'        => '200',
         'description' => 'Update Status Account Success...'
       );
-    }else{
+    } else {
       $return = array(
         'code'        => '400',
         'description' => 'Update Status Account Failed...'
@@ -275,12 +273,12 @@ class Login extends CI_Controller{
 
     $exec = $this->mlogin->update($where, $arr);
 
-    if($exec === true){
+    if ($exec === true) {
       $return = array(
         'code'        => '200',
         'description' => 'Reset Password Success...'
       );
-    }else{
+    } else {
       $return = array(
         'code'        => '400',
         'description' => 'Reset Password Failed...'
@@ -318,9 +316,9 @@ class Login extends CI_Controller{
       'browser'    => $this->input->user_agent()
     );
 
-    if($cek_ip_address->num_rows() == 0){
+    if ($cek_ip_address->num_rows() == 0) {
       $proses_kunjungan = $this->mvisit->create($data);
-    }else{
+    } else {
       $id_visit         = $cek_ip_address->row('id_visit');
       $proses_kunjungan = $this->mvisit->update($data, $id_visit);
     }
@@ -335,7 +333,7 @@ class Login extends CI_Controller{
     $max_dates  = 1;
     $countDates = -4;
     while ($countDates < $max_dates) {
-      $NewDate    = Date('Y-m-d', strtotime($countDates." days"));
+      $NewDate    = Date('Y-m-d', strtotime($countDates . " days"));
       $arr_date[] = $NewDate;
 
       $count_data       = $this->mvisit->count_visit($NewDate);
@@ -349,5 +347,5 @@ class Login extends CI_Controller{
   }
   ######################################################## END KUNJUNGAN  
 
-  
+
 }
